@@ -6,7 +6,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -55,11 +55,12 @@ public class DataBaseimpl implements DataAccess{
 		return "Product Saved Successfully";
 	}
 	public List<ProductEntity>  getList() {
-		List<ProductEntity> list=null;
+		List<ProductEntity> list=new ArrayList<>();
 		try {
             session = factory.openSession(); 
             tr = session.beginTransaction();
-          list=session.createCriteria(ProductEntity.class).list();                        
+					Query<ProductEntity> q = session.createQuery("from ProductEntity", ProductEntity.class);
+					list = q.getResultList();
         } catch (Exception e) {
             if (tr != null) tr.rollback();        
             e.printStackTrace();
@@ -88,7 +89,9 @@ public class DataBaseimpl implements DataAccess{
 		try {
             session = factory.openSession(); 
             tr = session.beginTransaction();
-          list=session.createCriteria(ProductEntity.class).add(Restrictions.eq("shelf", s)).list()     ;                
+		  Query<ProductEntity> q = session.createQuery("from ProductEntity where shelf = :s", ProductEntity.class);
+		  q.setParameter("s", s);
+		  list = q.getResultList();
         } catch (Exception e) {
             if (tr != null) tr.rollback();        
             e.printStackTrace();
